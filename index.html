@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Emails</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href="./frontend/assets/images/autou_logo.jpeg" type="image/x-icon">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="./frontend/assets/css/style.css">
+    <style>
+        :root {
+            --primary-orange: #FF6B35;
+            --primary-blue: #1E40AF;
+            --dark-blue: #0F172A;
+            --light-blue: #3B82F6;
+            --success-green: #10B981;
+            --warning-yellow: #F59E0B;
+            --error-red: #EF4444;
+            --white: #FFFFFF;
+            --light-gray: #F8FAFC;
+            --medium-gray: #E2E8F0;
+            --dark-gray: #64748B;
+            --gradient-bg: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-blue);
+            background: var(--light-gray);
+        }
+
+        header {
+            background: var(--gradient-bg);
+            color: var(--white);
+            padding: 2rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="50" cy="10" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            animation: float 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo i {
+            font-size: 3rem;
+            color: var(--primary-orange);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: -2rem auto 0;
+            padding: 0 2rem 4rem;
+            position: relative;
+            z-index: 3;
+        }
+
+        .upload-section {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.1);
+            border: 1px solid var(--medium-gray);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--primary-orange);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--medium-gray);
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--light-gray);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-orange);
+            background: rgba(255, 107, 53, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-orange);
+            background: rgba(255, 107, 53, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--dark-gray);
+            margin-bottom: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            color: var(--primary-orange);
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: var(--dark-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtext {
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .text-input-section {
+            margin-top: 2rem;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 2rem 0;
+            position: relative;
+            color: var(--dark-gray);
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--medium-gray);
+        }
+
+        .divider span {
+            background: var(--white);
+            padding: 0 1rem;
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1.5rem;
+            border: 2px solid var(--medium-gray);
+            border-radius: 15px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-orange), #FF8A65);
+            color: var(--white);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--dark-blue);
+            border: 2px solid var(--medium-gray);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-blue);
+            background: var(--light-gray);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid var(--medium-gray);
+            border-top: 4px solid var(--primary-orange);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .results-section {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.1);
+            border: 1px solid var(--medium-gray);
+            display: none;
+        }
+
+        .result-card {
+            background: var(--light-gray);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+            border-left: 5px solid var(--primary-orange);
+        }
+
+        .result-card.productive {
+            border-left-color: var(--success-green);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .result-card.unproductive {
+            border-left-color: var(--warning-yellow);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result-content {
+            color: var(--dark-gray);
+            line-height: 1.6;
+            margin-top: 1rem;
+        }
+
+        .confidence-score {
+            display: inline-block;
+            background: var(--primary-orange);
+            color: var(--white);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        footer {
+            background: var(--dark-blue);
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-orange);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            main {
+                padding: 0 1rem 2rem;
+            }
+
+            .upload-section {
+                padding: 2rem;
+            }
+
+            .upload-area {
+                padding: 2rem;
+            }
+
+            .btn-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .file-preview {
+            background: var(--light-gray);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            color: var(--primary-orange);
+        }
+
+        .file-details h4 {
+            color: var(--dark-blue);
+            margin-bottom: 0.2rem;
+        }
+
+        .file-details span {
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-envelope-open-text"></i>
+                <h1>AutoU Classificador de Emails</h1>
+            </div>
+            <p class="subtitle">Inteligência artificial para classificação automática de emails e geração de respostas
+                inteligentes</p>
+        </div>
+    </header>
+
+    <main>
+        <section class="upload-section">
+            <h2 class="section-title">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Enviar Email para Análise
+            </h2>
+
+            <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                <i class="fas fa-file-upload upload-icon"></i>
+                <p class="upload-text">Clique aqui ou arraste um arquivo</p>
+                <p class="upload-subtext">Formatos suportados: .txt, .pdf (máx. 10MB)</p>
+            </div>
+
+            <input type="file" id="file-input" accept=".txt,.pdf" />
+
+            <div class="file-preview" id="file-preview">
+                <div class="file-info">
+                    <i class="fas fa-file-alt file-icon"></i>
+                    <div class="file-details">
+                        <h4 id="file-name"></h4>
+                        <span id="file-size"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider">
+                <span>Ou cole o texto abaixo</span>
+            </div>
+
+            <div class="text-input-section">
+                <textarea id="email-text" placeholder="Cole o texto do email aqui para a análise.
+
+Exemplo:
+
+Assunto: Solicitação de suporte técnico
+De: cliente@empresa.com
+
+Prezados,
+
+Estou enfrentando dificuldades para acessar o sistema desde ontem. Quando tento fazer login, recebo uma mensagem de erro. Poderiam verificar minha conta?
+
+Aguardo retorno.
+
+Atenciosamente,
+João Silva"
+                ></textarea>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn btn-primary" id="analyze-btn">
+                    <i class="fas fa-brain"></i>
+                    Analisar Email
+                </button>
+                <button class="btn btn-secondary" id="clear-btn">
+                    <i class="fas fa-eraser"></i>
+                    Limpar
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analisando email com IA...</p>
+            </div>
+        </section>
+
+        <section class="results-section" id="results-section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-bar"></i>
+                Resultado da Análise
+            </h2>
+
+            <div class="result-card" id="classification-result">
+                <div class="result-title">
+                    <i class="fas fa-tag"></i>
+                    Classificação: <span id="classification-type"></span>
+                    <span class="confidence-score" id="confidence-score"></span>
+                </div>
+                <div class="result-content" id="classification-explanation"></div>
+            </div>
+
+            <div class="result-card" id="response-result">
+                <div class="result-title">
+                    <i class="fas fa-reply"></i>
+                    Resposta Sugerida
+                </div>
+                <div class="result-content" id="suggested-response"></div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn btn-primary" id="copy-response-btn">
+                    <i class="fas fa-copy"></i>
+                    Copiar Resposta
+                </button>
+                <button class="btn btn-secondary" id="new-analysis-btn">
+                    <i class="fas fa-plus"></i>
+                    Nova Análise
+                </button>
+            </div>
+        </section>
+    </main>
+
+<footer style="
+    background: #0F172A !important; 
+    color: white !important; 
+    text-align: center !important; 
+    padding: 8px !important; 
+    margin-top: 16px !important;
+    border: none !important;
+    display: block !important;
+    height: auto !important;
+    max-height: 60px !important;
+">
+    <img class="footer-logo" src="./frontend/assets/images/logo_branca.png" alt="logo AutoU" style="
+            max-width: 100px !important;
+            width: 60px !important;
+            height: auto !important;
+            margin: 0 auto 4px !important;
+            display: block !important;
+            object-fit: contain !important;
+        ">
+    <p class="footer-text" style="
+        font-size: 12px !important;
+        color: white !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    ">
+        Transformando processos através da tecnologia
+    </p>
+</footer>
+
+    <script>
+
+        let currentFile = null;
+
+        const fileInput = document.getElementById('file-input');
+        const emailTextArea = document.getElementById('email-text');
+        const uploadArea = document.querySelector('.upload-area');
+        const filePreview = document.getElementById('file-preview');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const loading = document.getElementById('loading');
+        const resultsSection = document.getElementById('results-section');
+
+        fileInput.addEventListener('change', handleFileSelect);
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleFileDrop);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                displayFilePreview(file);
+                currentFile = file;
+                emailTextArea.value = '';
+            }
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleFileDrop(event) {
+            event.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                displayFilePreview(file);
+                currentFile = file;
+                emailTextArea.value = '';
+            }
+        }
+
+        function displayFilePreview(file) {
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+
+            fileName.textContent = file.name;
+            fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            filePreview.style.display = 'block';
+        }
+
+        analyzeBtn.addEventListener('click', analyzeEmail);
+        clearBtn.addEventListener('click', clearForm);
+
+        const API_BASE_URL = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1') || window.location.port === '5000'
+        ? 'http://localhost:5000'
+        : window.location.origin;
+
+        const API_VERSION = 'v1';
+
+        // Estado da aplicação
+        let backendAvailable = false;
+        let systemMetrics = null;
+
+        // Verificar status do backend ao carregar
+        window.addEventListener('load', async () => {
+            await checkBackendStatus();
+            showWelcomeMessage();
+        });
+
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch('http://localhost:5000/api/v1/health', {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000)
+                });
+
+                if (response.ok) {
+                    const healthData = await response.json();
+                    backendAvailable = true;
+                    systemMetrics = healthData.metrics;
+
+                    updateBackendIndicator(true, healthData);
+                    console.log('🚀 Backend profissional conectado:', healthData);
+                }
+            } catch (error) {
+                console.warn('⚠️ Backend não disponível, usando modo offline');
+                backendAvailable = false;
+                updateBackendIndicator(false);
+            }
+        }
+
+        function updateBackendIndicator(connected, healthData = null) {
+            // Remove indicador anterior se existir
+            const existingIndicator = document.getElementById('backend-status');
+            if (existingIndicator) existingIndicator.remove();
+
+            const indicator = document.createElement('div');
+            indicator.id = 'backend-status';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                padding: 0.75rem 1.25rem;
+                border-radius: 25px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            `;
+
+            if (connected) {
+                indicator.style.background = 'linear-gradient(45deg, var(--success-green), #34D399)';
+                indicator.style.color = 'white';
+                indicator.innerHTML = `
+                    🚀 <strong>API Profissional</strong><br>
+                    <small>v${healthData?.version || '2.0'} • ${systemMetrics?.total_requests || 0} requests</small>
+                `;
+
+                // Tooltip com métricas
+                indicator.title = `Status: ${healthData?.status || 'healthy'}\nUptime: ${Math.round(healthData?.uptime_seconds || 0)}s\nSucesso: ${systemMetrics?.success_rate_percent || 100}%`;
+
+            } else {
+                indicator.style.background = 'linear-gradient(45deg, var(--warning-yellow), #FBBF24)';
+                indicator.style.color = 'white';
+                indicator.innerHTML = '💻 <strong>Modo Offline</strong><br><small>Classificação local ativa</small>';
+                indicator.title = 'Backend não disponível. Usando algoritmos JavaScript locais.';
+            }
+
+            indicator.addEventListener('click', showSystemInfo);
+            document.body.appendChild(indicator);
+        }
+
+        function showSystemInfo() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(15, 23, 42, 0.8);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 2000;
+                animation: fadeIn 0.3s ease-out;
+            `;
+
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: white;
+                padding: 2rem;
+                border-radius: 15px;
+                max-width: 500px;
+                max-height: 80vh;
+                overflow-y: auto;
+            `;
+
+            content.innerHTML = `
+                <h3 style="color: var(--primary-orange); margin-bottom: 1rem;">
+                    <i class="fas fa-info-circle"></i> Informações do Sistema
+                </h3>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong>Status do Backend:</strong> ${backendAvailable ?
+                    '<span style="color: var(--success-green);">🟢 Conectado</span>' :
+                    '<span style="color: var(--warning-yellow);">🟡 Offline</span>'}
+                </div>
+
+                ${backendAvailable && systemMetrics ? `
+                    <div style="background: var(--light-gray); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                        <h4 style="margin-bottom: 0.5rem;">📊 Métricas em Tempo Real:</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>🔢 Total de Requests: <strong>${systemMetrics.total_requests}</strong></li>
+                            <li>✅ Taxa de Sucesso: <strong>${systemMetrics.success_rate_percent}%</strong></li>
+                            <li>⚡ Tempo Médio: <strong>${systemMetrics.avg_processing_time}s</strong></li>
+                            <li>📈 Produtivos: <strong>${systemMetrics.classifications_count?.Produtivo || 0}</strong></li>
+                            <li>📉 Improdutivos: <strong>${systemMetrics.classifications_count?.Improdutivo || 0}</strong></li>
+                        </ul>
+                    </div>
+                ` : ''}
+
+                <div style="background: var(--light-gray); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                    <h4 style="margin-bottom: 0.5rem;">🔧 Recursos Disponíveis:</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li>${backendAvailable ? '🟢' : '🟡'} Classificação por IA</li>
+                        <li>${backendAvailable ? '🟢' : '🟡'} Múltiplos algoritmos</li>
+                        <li>${backendAvailable ? '🟢' : '🟡'} Geração de respostas</li>
+                        <li>${backendAvailable ? '🟢' : '🟡'} Processamento de arquivos</li>
+                        <li>${backendAvailable ? '🟢' : '🔴'} Métricas e analytics</li>
+                        <li>${backendAvailable ? '🟢' : '🔴'} Histórico de análises</li>
+                    </ul>
+                </div>
+
+                <button onclick="this.closest('div').remove()" style="
+                    width: 100%; 
+                    padding: 0.75rem; 
+                    background: var(--primary-orange); 
+                    color: white; 
+                    border: none; 
+                    border-radius: 8px; 
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-top: 1rem;
+                ">Fechar</button>
+            `;
+
+            modal.appendChild(content);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+            document.body.appendChild(modal);
+        }
+
+        async function analyzeEmail() {
+            const emailText = emailTextArea.value.trim();
+
+            if (!currentFile && !emailText) {
+                showNotification('Por favor, envie um arquivo ou digite o texto do email.', 'warning');
+                return;
+            }
+
+            if (emailText && emailText.length < 10) {
+                showNotification('Texto muito curto para análise. Mínimo 10 caracteres.', 'error');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                let result;
+
+                if (backendAvailable) {
+                    // Usar API profissional
+                    result = await analyzeWithProfessionalAPI(currentFile, emailText);
+                    result.source = 'professional_api';
+                } else {
+                    // Fallback para classificação local
+                    let textToAnalyze = emailText;
+                    if (currentFile && !emailText) {
+                        textToAnalyze = await readFileContent(currentFile);
+                    }
+                    result = await classifyLocally(textToAnalyze);
+                    result.source = 'local_javascript';
+                }
+
+                displayResults(result);
+                showNotification('✅ Análise concluída com sucesso!', 'success');
+
+                // Atualizar métricas do indicador
+                if (backendAvailable) {
+                    setTimeout(checkBackendStatus, 1000);
+                }
+
+            } catch (error) {
+                console.error('Erro:', error);
+                showNotification(`❌ Erro: ${error.message}`, 'error');
+
+                // Em caso de erro na API, tentar modo offline
+                if (backendAvailable && error.message.includes('fetch')) {
+                    showNotification('🔄 Tentando modo offline...', 'warning');
+                    backendAvailable = false;
+                    updateBackendIndicator(false);
+
+                    try {
+                        let textToAnalyze = emailText;
+                        if (currentFile && !emailText) {
+                            textToAnalyze = await readFileContent(currentFile);
+                        }
+                        const fallbackResult = await classifyLocally(textToAnalyze);
+                        fallbackResult.source = 'fallback_local';
+                        displayResults(fallbackResult);
+                        showNotification('✅ Análise concluída em modo offline!', 'success');
+                    } catch (fallbackError) {
+                        showNotification(`❌ Erro crítico: ${fallbackError.message}`, 'error');
+                    }
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function analyzeWithProfessionalAPI(file, text) {
+            const formData = new FormData();
+
+            if (file) {
+                formData.append('file', file);
+            } else {
+                formData.append('text', text);
+            }
+
+            // Adicionar algoritmo preferido
+            formData.append('algorithm', 'ensemble');
+
+            const response = await fetch('http://localhost:5000/api/v1/analyze', {
+                method: 'POST',
+                body: formData,
+                signal: AbortSignal.timeout(30000)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || errorData.error || `HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Adaptar resposta da API para formato esperado pelo frontend
+            return {
+                classification: data.classification,
+                confidence: data.confidence,
+                explanation: data.explanation,
+                suggested_response: data.suggested_response,
+                method: `${data.algorithm_used} (API Professional)`,
+                processing_time: data.processing_metrics?.total_time_seconds || 0,
+                request_id: data.request_id,
+                api_details: {
+                    algorithm: data.algorithm_used,
+                    api_version: data.api_version,
+                    processing_metrics: data.processing_metrics,
+                    analysis_details: data.analysis_details
+                }
+            };
+        }
+
+        function displayResults(result) {
+            const classificationResult = document.getElementById('classification-result');
+            const responseResult = document.getElementById('response-result');
+            const classificationType = document.getElementById('classification-type');
+            const confidenceScore = document.getElementById('confidence-score');
+            const classificationExplanation = document.getElementById('classification-explanation');
+            const suggestedResponse = document.getElementById('suggested-response');
+
+            // Update classification
+            const isProductive = result.classification.toLowerCase() === 'produtivo';
+
+            classificationType.textContent = result.classification;
+            confidenceScore.textContent = `${Math.round(result.confidence * 100)}%`;
+
+            // Explicação mais rica para API profissional
+            let explanation = result.explanation || 'Email classificado com base no conteúdo analisado.';
+            if (result.processing_time) {
+                explanation += ` (Processado em ${result.processing_time}s)`;
+            }
+            if (result.method) {
+                explanation += ` | Método: ${result.method}`;
+            }
+
+            classificationExplanation.textContent = explanation;
+
+            // Update card styling
+            classificationResult.className = `result-card ${isProductive ? 'productive' : 'unproductive'}`;
+
+            // Update response
+            suggestedResponse.textContent = result.suggested_response;
+
+            // Adicionar detalhes técnicos se disponível (API profissional)
+            if (result.api_details) {
+                const technicalDetails = document.createElement('div');
+                technicalDetails.style.cssText = `
+                    margin-top: 1rem;
+                    padding: 1rem;
+                    background: rgba(255, 107, 53, 0.05);
+                    border-radius: 8px;
+                    border-left: 3px solid var(--primary-orange);
+                `;
+                technicalDetails.innerHTML = `
+                    <h4 style="color: var(--primary-orange); margin-bottom: 0.5rem;">
+                        <i class="fas fa-cogs"></i> Detalhes Técnicos
+                    </h4>
+                    <small>
+                        ${result.request_id ? `ID: ${result.request_id}<br>` : ''}
+                        Algoritmo: ${result.api_details.algorithm}<br>
+                        API: ${result.api_details.api_version}<br>
+                        Tempo: ${result.api_details.processing_metrics?.total_time_seconds}s<br>
+                        Palavras: ${result.api_details.processing_metrics?.words_count || 'N/A'}
+                    </small>
+                `;
+
+                // Adicionar aos resultados se não existir
+                if (!classificationResult.querySelector('.technical-details')) {
+                    technicalDetails.className = 'technical-details';
+                    classificationResult.appendChild(technicalDetails);
+                }
+            }
+
+            // Show results
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showWelcomeMessage() {
+            setTimeout(() => {
+                const message = backendAvailable
+                    ? '🚀 AutoU Email Classifier carregado com API profissional!'
+                    : '💻 AutoU Email Classifier carregado em modo offline!';
+
+                showNotification(message, 'success');
+            }, 1500);
+        }
+
+        async function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    resolve(e.target.result);
+                };
+
+                reader.onerror = function () {
+                    reject(new Error('Erro ao ler o arquivo'));
+                };
+
+                // Para PDF, precisaríamos de uma biblioteca específica
+                // Por enquanto, apenas arquivos de texto
+                if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+                    reader.readAsText(file);
+                } else {
+                    // Para PDF, simular extração de texto
+                    resolve(`Conteúdo extraído do arquivo: ${file.name}\n\nEste é um exemplo de texto extraído de um PDF ou arquivo que seria processado pelo backend.`);
+                }
+            });
+        }
+
+        async function classifyLocally(text) {
+            // Simulação de delay para parecer mais real
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            const textLower = text.toLowerCase();
+
+            // Palavras-chave para classificação
+            const productiveKeywords = [
+                'problema', 'erro', 'bug', 'falha', 'não funciona', 'suporte', 'ajuda',
+                'dúvida', 'questão', 'solicitação', 'pedido', 'urgente', 'importante',
+                'prazo', 'deadline', 'reunião', 'meeting', 'proposta', 'orçamento',
+                'contrato', 'projeto', 'tarefa', 'implementar', 'desenvolver', 'criar',
+                'modificar', 'alterar', 'corrigir', 'resolver', 'atualização', 'status'
+            ];
+
+            const unproductiveKeywords = [
+                'parabéns', 'felicitações', 'aniversário', 'natal', 'ano novo', 'festas',
+                'obrigado', 'obrigada', 'agradecimento', 'gratidão', 'coffee', 'café',
+                'almoço', 'jantar', 'happy hour', 'fim de semana', 'feriado', 'férias',
+                'piada', 'engraçado', 'funny', 'compartilhar', 'forward', 'encaminhar'
+            ];
+
+            let productiveScore = 0;
+            let unproductiveScore = 0;
+
+            // Calcular scores
+            productiveKeywords.forEach(keyword => {
+                if (textLower.includes(keyword)) {
+                    productiveScore += keyword === 'urgente' || keyword === 'problema' || keyword === 'erro' ? 3 : 2;
+                }
+            });
+
+            unproductiveKeywords.forEach(keyword => {
+                if (textLower.includes(keyword)) {
+                    unproductiveScore += keyword === 'parabéns' || keyword === 'felicitações' ? 3 : 2;
+                }
+            });
+
+            // Análise adicional
+            const questionCount = (text.match(/\?/g) || []).length;
+            if (questionCount > 0) productiveScore += questionCount;
+
+            const exclamationCount = (text.match(/!/g) || []).length;
+            if (exclamationCount > 2) unproductiveScore += 1;
+
+            // Determinar classificação
+            const totalScore = productiveScore + unproductiveScore;
+            let classification, confidence, explanation;
+
+            if (totalScore === 0) {
+                // Sem palavras-chave específicas - analisar contexto
+                if (text.length > 200) {
+                    classification = 'Produtivo';
+                    confidence = 0.65;
+                    explanation = 'Email longo sem palavras-chave específicas, classificado como produtivo por precaução.';
+                } else {
+                    classification = 'Improdutivo';
+                    confidence = 0.55;
+                    explanation = 'Email curto sem indicadores claros de produtividade.';
+                }
+            } else {
+                if (productiveScore > unproductiveScore) {
+                    classification = 'Produtivo';
+                    confidence = Math.min(0.95, 0.6 + (productiveScore / totalScore) * 0.35);
+                    explanation = `Email classificado como produtivo devido à presença de termos relacionados a trabalho e solicitações (score: ${productiveScore} vs ${unproductiveScore}).`;
+                } else {
+                    classification = 'Improdutivo';
+                    confidence = Math.min(0.95, 0.6 + (unproductiveScore / totalScore) * 0.35);
+                    explanation = `Email classificado como improdutivo devido à natureza social ou informativa (score: ${unproductiveScore} vs ${productiveScore}).`;
+                }
+            }
+
+            // Gerar resposta automática
+            const suggestedResponse = generateResponse(text, classification);
+
+            return {
+                classification,
+                confidence: Math.round(confidence * 100) / 100,
+                explanation,
+                suggested_response: suggestedResponse,
+                method: 'Classificação Local (JavaScript)',
+                processed_content: text.substring(0, 200) + (text.length > 200 ? '...' : '')
+            };
+        }
+
+        function generateResponse(emailText, classification) {
+            if (classification === 'Produtivo') {
+                const responses = [
+                    `Prezado(a),
+
+Obrigado por entrar em contato conosco. Recebemos sua solicitação e nossa equipe está analisando a questão.
+
+Retornaremos com uma resposta em até 24 horas úteis. 
+
+Caso precise de suporte imediato, favor entrar em contato pelo telefone (xx) xxxx-xxxx.
+
+Atenciosamente,
+Equipe de Suporte`,
+
+                    `Olá,
+
+Agradecemos seu email. Sua solicitação foi registrada em nosso sistema com o protocolo #${generateProtocol()}.
+
+Nossa equipe especializada irá avaliar a situação e retornar com as informações solicitadas no menor prazo possível.
+
+Em caso de dúvidas, favor referenciar o número do protocolo em futuras comunicações.
+
+Cordialmente,
+Central de Atendimento`,
+
+                    `Caro(a) cliente,
+
+Confirmamos o recebimento de sua mensagem. Entendemos a importância de sua solicitação e estamos trabalhando para fornecer a melhor solução.
+
+Previsão de resposta: até 48 horas úteis.
+
+Agradecemos sua paciência e confiança em nossos serviços.
+
+Atenciosamente,
+Equipe Técnica`
+                ];
+
+                return responses[Math.floor(Math.random() * responses.length)];
+            } else {
+                const responses = [
+                    `Prezado(a),
+
+Muito obrigado por sua mensagem! É sempre um prazer receber contato de você.
+
+${getAcknowledgment(emailText)}
+
+Desejo a você um excelente dia!
+
+Cordialmente,
+[Nome]`,
+
+                    `Olá!
+
+Agradeço imensamente por pensar em mim/nós. Sua mensagem trouxe um sorriso ao meu dia!
+
+${getAcknowledgment(emailText)}
+
+Um abraço caloroso,
+[Nome]`,
+
+                    `Caro(a),
+
+Que gentileza sua! Muito obrigado por compartilhar esse momento conosco.
+
+${getAcknowledgment(emailText)}
+
+Com carinho,
+[Nome]`
+                ];
+
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+        }
+
+        function getAcknowledgment(emailText) {
+            const textLower = emailText.toLowerCase();
+
+            if (textLower.includes('parabéns') || textLower.includes('felicitações')) {
+                return 'Suas felicitações significam muito para nós!';
+            } else if (textLower.includes('natal') || textLower.includes('ano novo') || textLower.includes('festas')) {
+                return 'Retribuímos os votos de boas festas! Que o próximo período seja repleto de realizações.';
+            } else if (textLower.includes('aniversário')) {
+                return 'Muito obrigado pelos parabéns! Foi muito gentil de sua parte.';
+            } else if (textLower.includes('obrigado') || textLower.includes('obrigada') || textLower.includes('agradeço')) {
+                return 'Fico feliz em poder ajudar! Conte sempre conosco.';
+            } else {
+                return 'Agradeço por manter contato e pensar em nós.';
+            }
+        }
+
+        function generateProtocol() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const random = Math.floor(Math.random() * 9000) + 1000;
+            return `${year}${month}${random}`;
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+            `;
+
+            if (type === 'success') {
+                notification.style.background = 'var(--success-green)';
+            } else if (type === 'error') {
+                notification.style.background = 'var(--error-red)';
+            } else {
+                notification.style.background = 'var(--warning-yellow)';
+            }
+
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+
+        function showLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+            analyzeBtn.disabled = show;
+        }
+
+        function displayResults(result) {
+            const classificationResult = document.getElementById('classification-result');
+            const responseResult = document.getElementById('response-result');
+            const classificationType = document.getElementById('classification-type');
+            const confidenceScore = document.getElementById('confidence-score');
+            const classificationExplanation = document.getElementById('classification-explanation');
+            const suggestedResponse = document.getElementById('suggested-response');
+
+            // Update classification
+            const isProductive = result.classification.toLowerCase() === 'produtivo';
+
+            classificationType.textContent = result.classification;
+            confidenceScore.textContent = `${Math.round(result.confidence * 100)}%`;
+            classificationExplanation.textContent = result.explanation || 'Email classificado com base no conteúdo analisado.';
+
+            // Update card styling
+            classificationResult.className = `result-card ${isProductive ? 'productive' : 'unproductive'}`;
+
+            // Update response
+            suggestedResponse.textContent = result.suggested_response;
+
+            // Show results
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearForm() {
+            emailTextArea.value = '';
+            fileInput.value = '';
+            currentFile = null;
+            filePreview.style.display = 'none';
+            resultsSection.style.display = 'none';
+        }
+
+        // Copy response functionality
+        document.getElementById('copy-response-btn').addEventListener('click', () => {
+            const responseText = document.getElementById('suggested-response').textContent;
+            navigator.clipboard.writeText(responseText).then(() => {
+                alert('Resposta copiada para a área de transferência!');
+            });
+        });
+
+        // New analysis button
+        document.getElementById('new-analysis-btn').addEventListener('click', () => {
+            clearForm();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Remove dragover class when dragging leaves
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    </script>
+    </body>
+    
+    </html>
